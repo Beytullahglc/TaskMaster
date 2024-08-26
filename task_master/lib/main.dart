@@ -1,0 +1,208 @@
+import 'package:flutter/material.dart';
+import 'package:task_master/views/sayfalar.dart';
+
+void main() async {
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+
+  @override
+  Widget build(BuildContext context) {
+
+
+
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+
+
+        useMaterial3: true,
+      ),
+      home: const LoginPage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key, required this.title});
+
+
+  final String title;
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+
+
+  late AnimationController iconKontrol;
+  late Animation<double> iconAnimasyonDegerleri;
+
+  @override
+  void initState() {
+    super.initState();
+
+    iconKontrol = AnimationController(duration: Duration(milliseconds: 1000), vsync: this);
+
+    iconAnimasyonDegerleri = Tween(begin: 0.0, end: 220.0)
+        .animate(CurvedAnimation(parent: iconKontrol, curve: Curves.easeInOut))
+      ..addListener(() {
+        setState(() {});
+      });
+
+    iconKontrol.forward();
+
+
+  }
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String? errorMassage;
+  bool isLogin = true;
+  String? userId;
+
+  /*Future<void> createUser() async {
+    try{
+      await Auth().createUser(email: emailController.text, password: passwordController.text);
+      _showSnackBar();
+    }on FirebaseAuthException catch(e){
+      setState(() {
+        errorMassage = e.message;
+      });
+    }
+  }*/
+
+  void _showSnackBar() {
+    final snackBar = SnackBar(
+      content: Text('Hesap Başarıyla Kaydedildi!'),
+      backgroundColor: Colors.blueAccent,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  /*Future<void> signIn(BuildContext context) async {
+    try{
+      await Auth().signIn(email: emailController.text, password: passwordController.text);
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Sayfalar()));
+    }on FirebaseAuthException catch(e){
+      setState(() {
+        errorMassage = e.message;
+      });
+    }
+  }*/
+
+  @override
+  Widget build(BuildContext context) {
+
+    var ekranBilgisi = MediaQuery.of(context);
+    double ekranYuksekligi = ekranBilgisi.size.height;
+    double ekranGenisligi = ekranBilgisi.size.width;
+
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+
+        child: Column(
+
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: SizedBox(
+                width: iconAnimasyonDegerleri.value,
+                height: iconAnimasyonDegerleri.value,
+                child: Image.asset("assets/TaskMaster.png", ),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(ekranYuksekligi/35),
+              child: SizedBox(
+                width: ekranGenisligi*4/5,
+                child: TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                    hintStyle: TextStyle(color: Colors.blueAccent),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0))
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(ekranYuksekligi/35),
+              child: SizedBox(
+                width: ekranGenisligi*4/5,
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                    hintStyle: TextStyle(color: Colors.blueAccent),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0))
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            errorMassage != null ? Text(errorMassage!) : const SizedBox.shrink(),
+            Padding(
+              padding: EdgeInsets.all(ekranGenisligi/30),
+              child: SizedBox(
+                width: ekranGenisligi/2,
+                child: ElevatedButton(
+                  child: isLogin ?  Text("Giriş Yap", style: TextStyle(fontSize: ekranGenisligi/20, color: Colors.white),) : Text("Kayıt Ol", style: TextStyle(fontSize: ekranGenisligi/20, color: Colors.white),),
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                  ),
+                  onPressed: (){
+
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Sayfalar()));
+                    /*if(isLogin){
+                      signIn(context);
+                    }else{
+                      createUser();
+                    }*/
+                  },
+
+                ),
+              ),
+            ),
+
+            GestureDetector(
+              onTap: (){
+                setState(() {
+                  isLogin = !isLogin;
+                });
+              },
+              child: Text("Kayıt Ol", style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: ekranGenisligi/25,
+                fontWeight: FontWeight.bold,
+              ),),
+            ),
+          ],
+        ),
+      ),
+
+    );
+  }
+}
