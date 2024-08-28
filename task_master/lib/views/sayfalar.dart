@@ -18,7 +18,7 @@ class _SayfalarState extends State<Sayfalar> {
 
   var sayfaListesi = [
     const TakvimSayfa(),
-    const GorevlerSayfa(),
+     GorevlerSayfa(),
     const GorevEkleSayfa(), // Burada sayfa gösterimi yapılmıyor
     const BildirimSayfa(),
     const ProfilSayfa(),
@@ -45,12 +45,12 @@ class _SayfalarState extends State<Sayfalar> {
             color: page == 1 ? Colors.blueAccent : Colors.black,
           ),
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.blueAccent, // Arka plan rengini mavi yapıyoruz
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.add,
                 color: Colors.white,
               ),
