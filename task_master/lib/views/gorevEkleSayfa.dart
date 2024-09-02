@@ -147,7 +147,7 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                                 pickedTime.minute,
                               );
                               bitisTarihiController.text =
-                              "${selectedDateTime!.toIso8601String()}"; // ISO 8601 formatı
+                              selectedDateTime!.toIso8601String(); // ISO 8601 formatı
                             });
                           }
                         }
@@ -245,7 +245,7 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
         child: ExpansionTile(
           title: Text(
             title,
-            style: const TextStyle(fontSize: 18, color: Colors.blue),
+            style: const TextStyle(fontSize: 18, color: Colors.black),
           ),
           iconColor: Colors.blue,
           collapsedIconColor: Colors.blue,

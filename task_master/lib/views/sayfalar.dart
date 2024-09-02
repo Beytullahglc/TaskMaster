@@ -18,7 +18,7 @@ class _SayfalarState extends State<Sayfalar> {
 
   var sayfaListesi = [
     const TakvimSayfa(),
-     GorevlerSayfa(),
+     const GorevlerSayfa(),
     const GorevEkleSayfa(), // Burada sayfa gösterimi yapılmıyor
     const BildirimSayfa(),
     const ProfilSayfa(),

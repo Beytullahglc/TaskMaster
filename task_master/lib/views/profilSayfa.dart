@@ -11,7 +11,7 @@ class ProfilSayfa extends StatefulWidget {
 
 class _ProfilSayfaState extends State<ProfilSayfa> {
 
-  bool isSwitched = false;
+  bool bildirim = false;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class _ProfilSayfaState extends State<ProfilSayfa> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        isSwitched = !isSwitched;
+                        bildirim = !bildirim;
                       });
                     },
                     child: Padding(
@@ -82,12 +82,12 @@ class _ProfilSayfaState extends State<ProfilSayfa> {
                         height: 20.0, // Switch yüksekliği
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20.0),
-                          color: isSwitched ? Colors.blue : Colors.grey,
+                          color: bildirim ? Colors.blue : Colors.grey,
                         ),
                         child: AnimatedAlign(
                           duration: const Duration(milliseconds: 200),
                           curve: Curves.easeInOut,
-                          alignment: isSwitched ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: bildirim ? Alignment.centerRight : Alignment.centerLeft,
                           child: Container(
                             width: 16.0, // Thumb boyutu
                             height: 16.0,
