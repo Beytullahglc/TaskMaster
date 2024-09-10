@@ -134,7 +134,9 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    onPressed: (){},
+                    onPressed: (){
+
+                    },
                     child: Text("Değiştir", style: TextStyle(fontSize: ekranGenisligi/20, color: Colors.white),),
                   ),
                 ),

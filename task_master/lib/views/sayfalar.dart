@@ -1,6 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:task_master/views/bildirimSayfa.dart';
+import 'package:task_master/views/bildirimlerSayfa.dart';
 import 'package:task_master/views/gorevEkleSayfa.dart';
 import 'package:task_master/views/gorevlerSayfa.dart';
 import 'package:task_master/views/profilSayfa.dart';
@@ -14,13 +14,13 @@ class Sayfalar extends StatefulWidget {
 }
 
 class _SayfalarState extends State<Sayfalar> {
-  int page = 1; // Varsayılan olarak Görevler sayfası seçili
+  int _page = 1; // Varsayılan olarak Görevler sayfası seçili
 
-  var sayfaListesi = [
+  final List<Widget> _sayfaListesi = [
     const TakvimSayfa(),
-     const GorevlerSayfa(),
-    const GorevEkleSayfa(), // Burada sayfa gösterimi yapılmıyor
-    const BildirimSayfa(),
+    const GorevlerSayfa(),
+    const SizedBox(), // Boş bir container yerine SizedBox
+    const BildirimlerSayfa(),
     const ProfilSayfa(),
   ];
 
@@ -29,24 +29,24 @@ class _SayfalarState extends State<Sayfalar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: sayfaListesi[page],
+      body: _sayfaListesi[_page],
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
-        index: page,
+        index: _page,
         items: <Widget>[
           Icon(
-             page ==0? Icons.calendar_month : Icons.calendar_month_outlined,
+            _page == 0 ? Icons.calendar_month : Icons.calendar_month_outlined,
             size: 30,
-            color: page == 0 ? Colors.blueAccent : Colors.black,
+            color: _page == 0 ? Colors.blueAccent : Colors.black,
           ),
           Icon(
-             page == 1? Icons.task : Icons.task_outlined,
+            _page == 1 ? Icons.task : Icons.task_outlined,
             size: 30,
-            color: page == 1 ? Colors.blueAccent : Colors.black,
+            color: _page == 1 ? Colors.blueAccent : Colors.black,
           ),
           Container(
             decoration: const BoxDecoration(
-              color: Colors.blueAccent, // Arka plan rengini mavi yapıyoruz
+              color: Colors.blueAccent,
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -59,27 +59,26 @@ class _SayfalarState extends State<Sayfalar> {
                   context,
                   MaterialPageRoute(builder: (context) => const GorevEkleSayfa()),
                 ).then((_) {
-                  // Geri dönüldüğünde sayfa ve ikon güncellenir
                   setState(() {
-                    page = 1; // Görevler sayfasını seçili yap
+                    _page = 1; // Görevler sayfasını seçili yap
                   });
                 });
               },
             ),
           ),
           Icon(
-            page == 3? Icons.notifications : Icons.notifications_outlined,
+            _page == 3 ? Icons.notifications : Icons.notifications_outlined,
             size: 30,
-            color: page == 3 ? Colors.blueAccent : Colors.black,
+            color: _page == 3 ? Colors.blueAccent : Colors.black,
           ),
           Icon(
-            page == 4? Icons.person : Icons.person_outline,
+            _page == 4 ? Icons.person : Icons.person_outline,
             size: 30,
-            color: page == 4 ? Colors.blueAccent : Colors.black,
+            color: _page == 4 ? Colors.blueAccent : Colors.black,
           ),
         ],
         color: Colors.white,
-        buttonBackgroundColor: Colors.transparent, // Arka plan rengi şeffaf
+        buttonBackgroundColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 600),
@@ -89,14 +88,13 @@ class _SayfalarState extends State<Sayfalar> {
               context,
               MaterialPageRoute(builder: (context) => const GorevEkleSayfa()),
             ).then((_) {
-              // Geri dönüldüğünde sayfa ve ikon güncellenir
               setState(() {
-                page = 1; // Görevler sayfasını seçili yap
+                _page = 1; // Görevler sayfasını seçili yap
               });
             });
           } else {
             setState(() {
-              page = index;
+              _page = index;
             });
           }
         },

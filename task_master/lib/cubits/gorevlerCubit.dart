@@ -43,4 +43,5 @@ class GorevlerCubit extends Cubit<List<Gorevler>> {
       print('Görev ekleme hatası: $e');
     }
   }
+
 }

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_master/cubits/gorevlerCubit.dart';
 import 'package:task_master/entity/gorevler.dart';
 import 'package:intl/intl.dart';
-import 'package:task_master/views/profilSayfa.dart';
 
 class GorevlerSayfa extends StatefulWidget {
   const GorevlerSayfa({super.key});
