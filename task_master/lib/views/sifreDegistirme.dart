@@ -1,4 +1,4 @@
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SifreDegistirme extends StatefulWidget {
@@ -13,7 +13,7 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
   final TextEditingController _sifreController = TextEditingController();
   final TextEditingController _sifreTekrarController = TextEditingController();
 
- /* Future<void> _sifreyiDegistir() async {
+  Future<void> sifreyiDegistir() async {
     try {
       // Kullanıcının mevcut oturumunu al
       User? user = FirebaseAuth.instance.currentUser;
@@ -29,14 +29,14 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Şifre başarıyla değiştirildi.'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Girilen şifreler eşleşmiyor.'),
             backgroundColor: Colors.red,
           ),
@@ -50,7 +50,7 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
         ),
       );
     }
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,16 +66,18 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top:80, bottom: 15),
+                padding: const EdgeInsets.only(top: 80, bottom: 15),
                 child: SizedBox(
-                  width: ekranGenisligi/2,
-                  child: Image.asset("assets/TaskMaster.png", ),
+                  width: ekranGenisligi / 2,
+                  child: Image.asset(
+                    "assets/TaskMaster.png",
+                  ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(ekranYuksekligi/35),
+                padding: EdgeInsets.all(ekranYuksekligi / 35),
                 child: SizedBox(
-                  width: ekranGenisligi*4/5,
+                  width: ekranGenisligi * 4 / 5,
                   child: TextField(
                     controller: _kullaniciAdiController,
                     keyboardType: TextInputType.emailAddress,
@@ -84,16 +86,16 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0))
-                      ),
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
                     ),
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(ekranYuksekligi/35),
+                padding: EdgeInsets.all(ekranYuksekligi / 35),
                 child: SizedBox(
-                  width: ekranGenisligi*4/5,
+                  width: ekranGenisligi * 4 / 5,
                   child: TextField(
                     controller: _sifreController,
                     obscureText: true,
@@ -102,16 +104,16 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0))
-                      ),
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
                     ),
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(ekranYuksekligi/35),
+                padding: EdgeInsets.all(ekranYuksekligi / 35),
                 child: SizedBox(
-                  width: ekranGenisligi*4/5,
+                  width: ekranGenisligi * 4 / 5,
                   child: TextField(
                     controller: _sifreTekrarController,
                     obscureText: true,
@@ -120,24 +122,28 @@ class _SifreDegistirmeState extends State<SifreDegistirme> {
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0))
-                      ),
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
                     ),
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(top:  ekranGenisligi/10),
+                padding: EdgeInsets.only(top: ekranGenisligi / 10),
                 child: SizedBox(
-                  width: ekranGenisligi/2,
+                  width: ekranGenisligi / 2,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
-                    onPressed: (){
-
+                    onPressed: () {
+                      sifreyiDegistir();
                     },
-                    child: Text("Değiştir", style: TextStyle(fontSize: ekranGenisligi/20, color: Colors.white),),
+                    child: Text(
+                      "Değiştir",
+                      style: TextStyle(
+                          fontSize: ekranGenisligi / 20, color: Colors.white),
+                    ),
                   ),
                 ),
               ),

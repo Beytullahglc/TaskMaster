@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_master/cubits/bildirimlerCubit.dart';
 import 'package:task_master/cubits/gorevlerCubit.dart';
 import 'package:task_master/firebase_options.dart';
@@ -60,42 +61,58 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   late Animation<double> iconAnimation;
 
   final refGorevler = FirebaseDatabase.instance.ref().child("gorevler_tablo");
-  final refBildirimler = FirebaseDatabase.instance.ref().child("bildirimler_tablo"); // Bildirimler için referans
+  final refBildirimler = FirebaseDatabase.instance
+      .ref()
+      .child("bildirimler_tablo"); // Bildirimler için referans
   final FlutterLocalNotificationsPlugin flp = FlutterLocalNotificationsPlugin();
 
   Timer? hourlyNotificationTimer;
   bool dailyNotificationShown = false;
+  bool notificationsEnabled = false;
 
   @override
   void initState() {
     super.initState();
+    _loadNotificationPreference();
 
-    _initializeNotifications();
-    _setupDatabaseListener();
-    _startHourlyNotificationTimer();
-
-    iconController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
-    iconAnimation = Tween<double>(begin: 0.0, end: 220.0)
-        .animate(CurvedAnimation(parent: iconController, curve: Curves.easeInOut))
+    iconController = AnimationController(
+        duration: const Duration(milliseconds: 1000), vsync: this);
+    iconAnimation = Tween<double>(begin: 0.0, end: 220.0).animate(
+        CurvedAnimation(parent: iconController, curve: Curves.easeInOut))
       ..addListener(() {
         setState(() {});
       });
     iconController.forward();
-
-    _checkForDailyNotification();
   }
 
-  Future<void> _initializeNotifications() async {
-    const androidInitializationSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  Future<void> _loadNotificationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      notificationsEnabled = prefs.getBool('bildirim') ?? false;
+    });
+
+    if (notificationsEnabled) {
+      initializeNotifications();
+      setupDatabaseListener();
+      startHourlyNotificationTimer();
+      checkForDailyNotification();
+    }
+  }
+
+  Future<void> initializeNotifications() async {
+    const androidInitializationSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInitializationSettings = DarwinInitializationSettings();
     const initializationSettings = InitializationSettings(
       android: androidInitializationSettings,
       iOS: iosInitializationSettings,
     );
-    await flp.initialize(initializationSettings, onDidReceiveNotificationResponse: _onNotificationSelect);
+    await flp.initialize(initializationSettings,
+        onDidReceiveNotificationResponse: onNotificationSelect);
   }
 
-  Future<void> _onNotificationSelect(NotificationResponse notificationResponse) async {
+  Future<void> onNotificationSelect(
+      NotificationResponse notificationResponse) async {
     final payload = notificationResponse.payload;
     if (payload != null) {
       print("Notification Selected: $payload");
@@ -103,29 +120,42 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     }
   }
 
-  void _setupDatabaseListener() {
+  void setupDatabaseListener() {
     refGorevler.onValue.listen((event) {
-      _checkHourlyTasks();
+      checkHourlyTasks();
     });
   }
 
-  void _startHourlyNotificationTimer() {
-    hourlyNotificationTimer = Timer.periodic(const Duration(minutes: 10), (timer) => _checkHourlyTasks());
+  void startHourlyNotificationTimer() {
+    // Timer başlamadan önce bildirimlerin aktif olup olmadığını kontrol et
+    if (notificationsEnabled) {
+      hourlyNotificationTimer = Timer.periodic(
+          const Duration(minutes: 10),
+              (timer) {
+            if (notificationsEnabled) { // Her bildirim tetiklendiğinde tekrar kontrol et
+              checkHourlyTasks();
+            } else {
+              // Bildirimler kapalıysa timer'ı iptal et
+              timer.cancel();
+            }
+          }
+      );
+    }
   }
 
-  void _checkForDailyNotification() async {
+  void checkForDailyNotification() async {
     final now = DateTime.now();
 
     // Check if daily notification has already been shown
     if (!dailyNotificationShown && now.hour >= 8) {
-      await _showDailyNotification();
+      await showDailyNotification();
       setState(() {
         dailyNotificationShown = true;
       });
     }
   }
 
-  Future<void> _showDailyNotification() async {
+  Future<void> showDailyNotification() async {
     final event = await refGorevler.once();
     final snapshot = event.snapshot;
 
@@ -138,7 +168,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         final endDate = DateTime.parse(task['bitisTarihi']);
         final taskName = task['gorevAdi'];
 
-        if (endDate.day == now.day && endDate.month == now.month && endDate.year == now.year) {
+        if (endDate.day == now.day &&
+            endDate.month == now.month &&
+            endDate.year == now.year) {
           dailyTasks.add(taskName);
         }
       });
@@ -146,12 +178,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
     if (dailyTasks.isNotEmpty) {
       const androidNotificationDetails = AndroidNotificationDetails(
-        "daily_channel_id", "Daily Tasks", channelDescription: "Daily Tasks Channel",
-        priority: Priority.high, importance: Importance.max,
+        "daily_channel_id",
+        "Daily Tasks",
+        channelDescription: "Daily Tasks Channel",
+        priority: Priority.high,
+        importance: Importance.max,
       );
 
       const iosNotificationDetails = DarwinNotificationDetails();
-      const notificationDetails = NotificationDetails(android: androidNotificationDetails, iOS: iosNotificationDetails);
+      const notificationDetails = NotificationDetails(
+          android: androidNotificationDetails, iOS: iosNotificationDetails);
 
       await flp.show(
         0,
@@ -162,11 +198,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       );
 
       // Firebase'e bildirim kaydet
-      await _saveNotificationToFirebase("Daily Tasks", "Today's tasks: ${dailyTasks.join(", ")}");
+      await saveNotificationToFirebase(
+          "Daily Tasks", "Today's tasks: ${dailyTasks.join(", ")}");
     }
   }
 
-  Future<void> _checkHourlyTasks() async {
+  Future<void> checkHourlyTasks() async {
     final event = await refGorevler.once();
     final snapshot = event.snapshot;
 
@@ -187,12 +224,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
     if (hourlyTasks.isNotEmpty) {
       const androidNotificationDetails = AndroidNotificationDetails(
-        "hourly_channel_id", "Hourly Tasks", channelDescription: "Hourly Tasks Channel",
-        priority: Priority.high, importance: Importance.max,
+        "hourly_channel_id",
+        "Hourly Tasks",
+        channelDescription: "Hourly Tasks Channel",
+        priority: Priority.high,
+        importance: Importance.max,
       );
 
       const iosNotificationDetails = DarwinNotificationDetails();
-      const notificationDetails = NotificationDetails(android: androidNotificationDetails, iOS: iosNotificationDetails);
+      const notificationDetails = NotificationDetails(
+          android: androidNotificationDetails, iOS: iosNotificationDetails);
 
       await flp.show(
         1,
@@ -203,11 +244,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       );
 
       // Firebase'e bildirim kaydet
-      await _saveNotificationToFirebase("Upcoming Tasks", "Tasks ending within an hour: ${hourlyTasks.join(", ")}");
+      await saveNotificationToFirebase("Upcoming Tasks",
+          "Tasks ending within an hour: ${hourlyTasks.join(", ")}");
     }
   }
 
-  Future<void> _saveNotificationToFirebase(String title, String body) async {
+  Future<void> saveNotificationToFirebase(String title, String body) async {
     final now = DateTime.now().toIso8601String();
 
     await refBildirimler.push().set({
@@ -289,8 +331,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    errorMessage!, style: const TextStyle(color: Colors.red),
                   ),
                 ),
               Padding(
@@ -307,7 +348,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
                       if (isLogin) {
                         try {
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(email: email, password: password);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -321,7 +363,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         }
                       } else {
                         try {
-                          await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+                          await FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                  email: email, password: password);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -335,7 +379,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                         }
                       }
                     },
-                    child: Text(isLogin ? 'Giriş Yap' : 'Kayıt Ol', style: const TextStyle(color: Colors.white),),
+                    child: Text(
+                      isLogin ? 'Giriş Yap' : 'Kayıt Ol', style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
@@ -346,7 +392,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     errorMessage = null;
                   });
                 },
-                child: Text(isLogin ? 'Kayıt ol' : 'Giriş yap', style: const TextStyle(color: Colors.blue),),
+                child: Text(
+                  isLogin ? 'Kayıt ol' : 'Giriş yap', style: const TextStyle(color: Colors.blue),
+                ),
               ),
             ],
           ),
@@ -362,3 +410,67 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     super.dispose();
   }
 }
+
+
+/*Padding(
+                padding: const EdgeInsets.only(top: 60, bottom: 20),
+                child: SizedBox(
+                  width: screenWidth * 3 / 7,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    onPressed: () async {
+                      final email = emailController.text.trim();
+                      final password = passwordController.text.trim();
+
+                      if (isLogin) {
+                        try {
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(email: email, password: password);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Sayfalar(),
+                            ),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          setState(() {
+                            errorMessage = e.message;
+                          });
+                        }
+                      } else {
+                        try {
+                          await FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                  email: email, password: password);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Sayfalar(),
+                            ),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          setState(() {
+                            errorMessage = e.message;
+                          });
+                        }
+                      }
+                    },
+                    child: Text(
+                      isLogin ? 'Giriş Yap' : 'Kayıt Ol', style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    isLogin = !isLogin;
+                    errorMessage = null;
+                  });
+                },
+                child: Text(
+                  isLogin ? 'Kayıt ol' : 'Giriş yap', style: const TextStyle(color: Colors.blue),
+                ),
+              ),*/

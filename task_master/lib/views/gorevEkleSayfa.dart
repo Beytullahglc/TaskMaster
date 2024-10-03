@@ -26,6 +26,7 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
   ];
 
   DateTime? selectedDateTime;
+  int? selectedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +58,12 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
         children: [
           SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 100), // Buton için boşluk bırak
+              padding: const EdgeInsets.only(bottom: 100),
               child: Column(
                 children: [
                   // Görev Adı Bölümü
-                  _buildExpansionTile(
-                    context: context,
+                  buildExpansionTile(
+                    index: 0,
                     title: 'Görev Adı',
                     child: TextField(
                       controller: gorevAdiController,
@@ -77,8 +78,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                   ),
 
                   // Açıklama Bölümü
-                  _buildExpansionTile(
-                    context: context,
+                  buildExpansionTile(
+                    index: 1,
                     title: 'Açıklama',
                     child: TextField(
                       controller: aciklamaController,
@@ -92,8 +93,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                   ),
 
                   // Kategori Seçimi Bölümü
-                  _buildExpansionTile(
-                    context: context,
+                  buildExpansionTile(
+                    index: 2,
                     title: 'Kategori',
                     child: Column(
                       children: kategoriler.map((kategori) {
@@ -114,8 +115,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                   ),
 
                   // Bitiş Tarihi ve Saati Bölümü
-                  _buildExpansionTile(
-                    context: context,
+                  buildExpansionTile(
+                    index: 3,
                     title: 'Bitiş Tarihi ve Saati',
                     child: TextField(
                       controller: bitisTarihiController,
@@ -147,7 +148,7 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                                 pickedTime.minute,
                               );
                               bitisTarihiController.text =
-                              selectedDateTime!.toIso8601String(); // ISO 8601 formatı
+                                  selectedDateTime!.toIso8601String();
                             });
                           }
                         }
@@ -163,8 +164,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
-                width: 230, // Buton genişliği
-                height: 40, // Buton yüksekliği
+                width: 230,
+                height: 40,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
@@ -178,7 +179,6 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                         aciklamaController.text.isEmpty ||
                         selectedKategori == null ||
                         bitisTarihiController.text.isEmpty) {
-                      // Boş alan kontrolü
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Lütfen tüm alanları doldurun.'),
@@ -187,7 +187,6 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                       return;
                     }
 
-                    // Tarih ve saat formatını doğrulama
                     DateTime? bitisTarihi;
                     try {
                       bitisTarihi = DateTime.parse(bitisTarihiController.text);
@@ -200,9 +199,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                       return;
                     }
 
-                    // Yeni görev oluştur
                     final yeniGorev = Gorevler(
-                      gorevId: '', // ID Firebase tarafından otomatik ayarlanacak
+                      gorevId: '',
                       gorevAdi: gorevAdiController.text,
                       aciklama: aciklamaController.text,
                       kategori: selectedKategori!,
@@ -210,10 +208,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
                       bittiMi: isCompleted,
                     );
 
-                    // Görevi ekle
                     context.read<GorevlerCubit>().gorevEkle(yeniGorev);
 
-                    // Başarılı ekleme mesajı ve sayfayı kapat
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Görev başarıyla eklendi.'),
@@ -231,8 +227,8 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
     );
   }
 
-  Widget _buildExpansionTile({
-    required BuildContext context,
+  Widget buildExpansionTile({
+    required int index,
     required String title,
     required Widget child,
   }) {
@@ -249,6 +245,17 @@ class _GorevEkleSayfaState extends State<GorevEkleSayfa> {
           ),
           iconColor: Colors.blue,
           collapsedIconColor: Colors.blue,
+          initiallyExpanded: selectedIndex == index,
+          onExpansionChanged: (isOpen) {
+            setState(() {
+              // Eğer önceki açık olan tile kapatıldıysa, önceki tile'ın indeksini null yap
+              if (isOpen) {
+                selectedIndex = (selectedIndex == index) ? null : index;
+              } else if (selectedIndex == index) {
+                selectedIndex = null;
+              }
+            });
+          },
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),

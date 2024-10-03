@@ -16,7 +16,7 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
   String aramaSonucu = "";
   bool tamamlananGorevler = false;
   bool devamEdenGorevler = false;
-
+  Set<String> secilenKategoriler = {};
 
   @override
   void initState() {
@@ -30,19 +30,21 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
       appBar: AppBar(
         title: aramaYapiliyorMu
             ? TextField(
-          decoration: const InputDecoration(
-            hintText: "Ara",
-            hintStyle: TextStyle(color: Colors.white),
-          ),
-          style: const TextStyle(color: Colors.white),
-          onChanged: (value) {
-            setState(() {
-              aramaSonucu = value;
-            });
-          },
-        )
-            :  const Text('Görevler' , style: TextStyle(color: Colors.white),
-        ),
+                decoration: const InputDecoration(
+                  hintText: "Ara",
+                  hintStyle: TextStyle(color: Colors.white),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onChanged: (value) {
+                  setState(() {
+                    aramaSonucu = value;
+                  });
+                },
+              )
+            : const Text(
+                'Görevler',
+                style: TextStyle(color: Colors.white),
+              ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -62,24 +64,24 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
         actions: [
           aramaYapiliyorMu
               ? IconButton(
-            color: Colors.black,
-            icon: const Icon(Icons.cancel_outlined, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                aramaYapiliyorMu = false;
-                aramaSonucu = "";
-              });
-            },
-          )
+                  color: Colors.black,
+                  icon: const Icon(Icons.cancel_outlined, color: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      aramaYapiliyorMu = false;
+                      aramaSonucu = "";
+                    });
+                  },
+                )
               : IconButton(
-            color: Colors.black,
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                aramaYapiliyorMu = true;
-              });
-            },
-          ),
+                  color: Colors.black,
+                  icon: const Icon(Icons.search, color: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      aramaYapiliyorMu = true;
+                    });
+                  },
+                ),
         ],
       ),
       body: BlocBuilder<GorevlerCubit, List<Gorevler>>(
@@ -90,8 +92,11 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
                 gorev.aciklama.toLowerCase().contains(searchTerm) ||
                 gorev.kategori.toLowerCase().contains(searchTerm);
             final isCompleted = gorev.bittiMi;
+            final isCategoryMatch = secilenKategoriler.isEmpty ||
+                secilenKategoriler.contains(gorev.kategori);
 
             return isMatch &&
+                isCategoryMatch &&
                 ((tamamlananGorevler && isCompleted) ||
                     (devamEdenGorevler && !isCompleted) ||
                     (!tamamlananGorevler && !devamEdenGorevler));
@@ -116,12 +121,17 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ExpansionTile(
-                          title: Text(gorev.gorevAdi,style: const TextStyle(fontSize: 18,color: Colors.black),),
+                          title: Text(
+                            gorev.gorevAdi,
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
+                          ),
                           iconColor: Colors.blue,
                           collapsedIconColor: Colors.blue,
                           subtitle: Text(
                             gorev.kategori,
-                            style: const TextStyle(color: Colors.black54, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.black54, fontSize: 15),
                           ),
                           children: [
                             ListTile(
@@ -166,11 +176,14 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     title: const Text('Görev Sil'),
-                                    content: const Text('Bu görevi silmek istediğinizden emin misiniz?'),
+                                    content: const Text(
+                                        'Bu görevi silmek istediğinizden emin misiniz?'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
-                                          context.read<GorevlerCubit>().gorevSil(gorev.gorevId);
+                                          context
+                                              .read<GorevlerCubit>()
+                                              .gorevSil(gorev.gorevId);
                                           Navigator.of(context).pop();
                                         },
                                         child: const Text('Evet'),
@@ -212,27 +225,59 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CheckboxListTile(
-                    value: tamamlananGorevler,
-                    title: const Text("Tamamlanan"),
-                    activeColor: Colors.blue,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool? veri) {
-                      setDialogState(() {
-                        tamamlananGorevler = veri!;
-                      });
-                    },
+                  ExpansionTile(
+                    title: const Text("Tamamlanma Durumu"),
+                    iconColor: Colors.blue,
+                    collapsedIconColor: Colors.blue,
+                    children: [
+                      CheckboxListTile(
+                        value: tamamlananGorevler,
+                        title: const Text("Tamamlanan"),
+                        activeColor: Colors.blue,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? veri) {
+                          setDialogState(() {
+                            tamamlananGorevler = veri!;
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        value: devamEdenGorevler,
+                        title: const Text("Devam Eden"),
+                        activeColor: Colors.blue,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (bool? veri) {
+                          setDialogState(() {
+                            devamEdenGorevler = veri!;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  CheckboxListTile(
-                    value: devamEdenGorevler,
-                    title: const Text("Devam Eden"),
-                    activeColor: Colors.blue,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool? veri) {
-                      setDialogState(() {
-                        devamEdenGorevler = veri!;
-                      });
-                    },
+                  ExpansionTile(
+                    title: const Text("Kategoriler"),
+                    iconColor: Colors.blue,
+                    collapsedIconColor: Colors.blue,
+                    children: [
+                      ...['Kişisel', 'Çalışma', 'Öğrenim', 'Eğlence', 'Diğer']
+                          .map((kategori) {
+                        return CheckboxListTile(
+                          value: secilenKategoriler.contains(kategori),
+                          title: Text(kategori),
+                          activeColor: Colors.blue,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          onChanged: (bool? veri) {
+                            setDialogState(() {
+                              if (veri == true) {
+                                secilenKategoriler.add(kategori);
+                              } else {
+                                secilenKategoriler.remove(kategori);
+                              }
+                            });
+                          },
+                        );
+                      }),
+                    ],
                   ),
                 ],
               );
@@ -244,7 +289,7 @@ class _GorevlerSayfaState extends State<GorevlerSayfa> {
                 Navigator.of(context).pop();
                 setState(() {}); // Ekranı günceller
               },
-              child: const Text('Tamam',style: TextStyle(color: Colors.blue),),
+              child: const Text('Tamam', style: TextStyle(color: Colors.blue)),
             ),
           ],
         );

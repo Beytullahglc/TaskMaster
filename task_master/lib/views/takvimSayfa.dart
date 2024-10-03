@@ -26,7 +26,8 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
   void _mapGorevlerToEvents(List<Gorevler> gorevler) {
     gorevEvents.clear();
     for (var gorev in gorevler) {
-      DateTime tarih = DateTime(gorev.bitisTarihi.year, gorev.bitisTarihi.month, gorev.bitisTarihi.day);
+      DateTime tarih = DateTime(gorev.bitisTarihi.year, gorev.bitisTarihi.month,
+          gorev.bitisTarihi.day);
 
       if (gorevEvents[tarih] != null) {
         gorevEvents[tarih]!.add(gorev);
@@ -37,7 +38,8 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
   }
 
   void _showGorevlerSheet(List<Gorevler> gorevler, DateTime selectedDay) {
-    String formattedDate = DateFormat('d MMMM').format(selectedDay); // Tarihi formatlamak için
+    String formattedDate =
+        DateFormat('d MMMM').format(selectedDay); // Tarihi formatlamak için
 
     showModalBottomSheet(
       context: context,
@@ -58,34 +60,39 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
               Expanded(
                 child: gorevler.isNotEmpty
                     ? ListView.builder(
-                  itemCount: gorevler.length,
-                  itemBuilder: (context, index) {
-                    Gorevler gorev = gorevler[index];
-                    return ListTile(
-                      title: Text(gorev.gorevAdi),
-                      subtitle: Text(gorev.aciklama),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            gorev.bittiMi ? 'Tamamlandı' : 'Tamamlanmadı',
-                            style: TextStyle(
-                              color: gorev.bittiMi ? Colors.green : Colors.red,
+                        itemCount: gorevler.length,
+                        itemBuilder: (context, index) {
+                          Gorevler gorev = gorevler[index];
+                          return ListTile(
+                            title: Text(gorev.gorevAdi),
+                            subtitle: Text(gorev.aciklama),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  gorev.bittiMi ? 'Tamamlandı' : 'Tamamlanmadı',
+                                  style: TextStyle(
+                                    color: gorev.bittiMi
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                                ),
+                                const SizedBox(
+                                    width:
+                                        8), // İkon ve yazı arasına boşluk ekler
+                                Icon(
+                                  gorev.bittiMi ? Icons.check : Icons.close,
+                                  color:
+                                      gorev.bittiMi ? Colors.green : Colors.red,
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(width: 8), // İkon ve yazı arasına boşluk ekler
-                          Icon(
-                            gorev.bittiMi ? Icons.check : Icons.close,
-                            color: gorev.bittiMi ? Colors.green : Colors.red,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                )
+                          );
+                        },
+                      )
                     : const Center(
-                  child: Text("Bu tarihte görev bulunmuyor."),
-                ),
+                        child: Text("Bu tarihte görev bulunmuyor."),
+                      ),
               ),
             ],
           ),
@@ -132,11 +139,16 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
                     _focusedDay = focusedDay;
                   });
 
-                  List<Gorevler> selectedGorevler = gorevEvents[DateTime(selectedDay.year, selectedDay.month, selectedDay.day)] ?? [];
+                  List<Gorevler> selectedGorevler = gorevEvents[DateTime(
+                          selectedDay.year,
+                          selectedDay.month,
+                          selectedDay.day)] ??
+                      [];
                   _showGorevlerSheet(selectedGorevler, selectedDay);
                 },
                 eventLoader: (day) {
-                  DateTime selectedDayWithoutTime = DateTime(day.year, day.month, day.day);
+                  DateTime selectedDayWithoutTime =
+                      DateTime(day.year, day.month, day.day);
                   return gorevEvents[selectedDayWithoutTime] ?? [];
                 },
                 calendarStyle: const CalendarStyle(
