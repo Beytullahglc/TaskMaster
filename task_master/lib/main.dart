@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _loadNotificationPreference();
+    loadNotificationPreference();
 
     iconController = AnimationController(
         duration: const Duration(milliseconds: 1000), vsync: this);
@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     iconController.forward();
   }
 
-  Future<void> _loadNotificationPreference() async {
+  Future<void> loadNotificationPreference() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       notificationsEnabled = prefs.getBool('bildirim') ?? false;

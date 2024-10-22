@@ -23,7 +23,7 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
     context.read<GorevlerCubit>().gorevleriYukle();
   }
 
-  void _mapGorevlerToEvents(List<Gorevler> gorevler) {
+  void mapGorevlerToEvents(List<Gorevler> gorevler) {
     gorevEvents.clear();
     for (var gorev in gorevler) {
       DateTime tarih = DateTime(gorev.bitisTarihi.year, gorev.bitisTarihi.month,
@@ -37,7 +37,7 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
     }
   }
 
-  void _showGorevlerSheet(List<Gorevler> gorevler, DateTime selectedDay) {
+  void showGorevlerSheet(List<Gorevler> gorevler, DateTime selectedDay) {
     String formattedDate =
         DateFormat('d MMMM').format(selectedDay); // Tarihi formatlamak için
 
@@ -122,7 +122,7 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
       ),
       body: BlocBuilder<GorevlerCubit, List<Gorevler>>(
         builder: (context, gorevler) {
-          _mapGorevlerToEvents(gorevler);
+          mapGorevlerToEvents(gorevler);
 
           return Column(
             children: [
@@ -144,7 +144,7 @@ class _TakvimSayfaState extends State<TakvimSayfa> {
                           selectedDay.month,
                           selectedDay.day)] ??
                       [];
-                  _showGorevlerSheet(selectedGorevler, selectedDay);
+                  showGorevlerSheet(selectedGorevler, selectedDay);
                 },
                 eventLoader: (day) {
                   DateTime selectedDayWithoutTime =
